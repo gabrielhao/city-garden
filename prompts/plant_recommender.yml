@@ -1,0 +1,111 @@
+plant_recommender_en: |
+    You are a botany expert. Your task is to recommend suitable plants for someone who wants to create a small garden on their balcony. Please consider the following environmental conditions and preferences:
+
+    ### User's preferences:
+    {preferences}
+
+    ### Environment report:
+    {report}
+
+    Based on this context, please generate a list of at least 3 suitable plants that would thrive in these conditions following the JSON structure below:
+    {
+      "recommended_plants": [
+        {
+          "name": "<plantA>",
+          "description": "<A description of plantA.>",
+          "care_tips": "<Care tips of plantA.>"
+        },
+        {
+          "name": "<plantB>",
+          "description": "<A description of plantB.>",
+          "care_tips": "<Care tips of plantB.>"
+        },
+        {
+          "name": "<plantC>",
+          "description": "<A description of plantC.>",
+          "care_tips": "<Care tips of plantC.>"
+        },
+        ...
+      ]
+    }
+
+plant_recommender_zh: |
+  你是一名植物学专家。你的任务是为想在阳台上打造小花园的用户推荐适合的植物。请根据以下环境条件和用户偏好提供建议：
+
+  ### 用户偏好：
+  {preferences}
+
+  ### 环境报告：
+  {report}
+
+  根据以上背景，请按照以下JSON格式推荐至少3种适合在该环境下生长的植物：
+  {
+    "recommended_plants": [
+      {
+        "name": "<plantA>",
+        "description": "<plantA的描述>",
+        "care_tips": "<plantA的护理建议>"
+      },
+      {
+        "name": "<plantB>",
+        "description": "<plantB的描述>",
+        "care_tips": "<plantB的护理建议>"
+      },
+      {
+        "name": "<plantC>",
+        "description": "<plantC的描述>",
+        "care_tips": "<plantC的护理建议>"
+      },
+      ...
+    ]
+  }
+  请确保推荐植物符合用户的环境条件和偏好，并提供实用的养护指导。
+
+example_input_output:
+    model:
+      - gpt-4o or better versions
+    input:
+      - preferences:
+          - Experience Level: Beginner (no experience with plant care)
+          - Plant Type: Flowering plants
+          - Watering: Low to moderate watering needs
+          - Soil Type: Well-draining soil
+      - report:
+        {
+          "sunlight_exposure": "The compass indicates a northwest orientation (301°), suggesting that the location receives moderate afternoon sunlight but limited direct morning sunlight. Shadows from nearby structures may impact light availability further.",
+          "micro_climate": "The presence of nearby buildings and fences likely creates a sheltered micro-climate with reduced wind exposure. However, it might limit temperature fluctuations, providing some warmth but potentially trapping excessive moisture in the vicinity.",
+          "hardscape_elements": "Window ledges, fences, and nearby building walls are key hardscape elements. These may reflect or absorb heat, influencing plant growth conditions. The proximity to the street introduces potential heat and light reflection from paved surfaces.",
+          "plant_inventory": "Indoor plants include spider plants, purple heart, philodendron, and others in pots on the windowsill. Health appears moderate with some yellowing and drooping leaves, possibly due to watering irregularities or insufficient light. Outdoor window boxes house purple heart plants. Existing plants should be assessed for compatibility with available light and micro-climate.",
+          "environmental_factors": "Key environmental factors include proximity to street-facing windows, which may expose plants to noise, pollution, and varying temperatures. Fenced front yards provide moderate isolation but have limited space for additional planting.",
+          "wind_pattern": "The northwest orientation and sheltered indoor setting reduce wind exposure. However, outdoor window boxes may be subject to occasional gusts or turbulent airflow created by nearby structures."
+        }
+    output:
+      {
+        "recommended_plants": [
+          {
+            "name": "Begonia (Begonia spp.)",
+            "description": "Begonias are versatile flowering plants with vibrant blooms that range in color from reds and pinks to oranges and yellows. They are well-suited for areas with indirect sunlight and can adapt to a variety of indoor or sheltered outdoor locations.",
+            "care_tips": "Place your Begonia in a spot with bright, indirect light, such as near a northwest-facing window. Water when the top inch of soil feels dry, and ensure the pot has well-draining soil to avoid waterlogging. Avoid misting leaves as this can lead to fungal issues."
+          },
+          {
+            "name": "Kalanchoe (Kalanchoe blossfeldiana)",
+            "description": "Kalanchoe is a low-maintenance succulent that produces clusters of small, vibrant flowers in a variety of colors. It thrives in mildly sunny conditions and can tolerate beginner care routines.",
+            "care_tips": "Provide bright, indirect light and water every 2-3 weeks or when the soil is completely dry. Use a well-draining potting mix, preferably one formulated for cacti or succulents. Avoid overwatering, as it is the primary cause of issues for this plant."
+          },
+          {
+            "name": "Peace Lily (Spathiphyllum)",
+            "description": "A popular flowering indoor plant, the Peace Lily produces elegant white flowers (spathes) and lush deep-green foliage. It adapts well to moderate light conditions and is forgiving of occasional missed waterings.",
+            "care_tips": "Position the Peace Lily in a spot with moderate to low indirect sunlight. Water when the top 1-2 inches of soil feel dry, and mist occasionally to increase humidity. Use a well-draining potting mix and avoid placing it in drafty or overly hot areas."
+          },
+          {
+            "name": "Geranium (Pelargonium)",
+            "description": "Geraniums are hardy flowering plants with stunning clusters of blooms in pinks, reds, and whites. They thrive in window boxes and can handle moderate sunlight in cooler micro-climates.",
+            "care_tips": "Place in a northwest-facing window box where they receive bright light during the afternoon. Use well-draining soil, and water deeply when the top layer feels dry. Prune spent flowers and leaves to encourage new growth."
+          },
+          {
+            "name": "Anthurium (Anthurium andraeanum)",
+            "description": "Known as the Flamingo Flower, Anthuriums are tropical plants with striking red, pink, or white bract-like flowers and patterned glossy leaves. They thrive in moderate indoor light and are forgiving of small care mishaps.",
+            "care_tips": "Anthuriums prefer medium to bright, indirect sunlight. Allow soil to dry slightly between waterings, and ensure the pot allows for good drainage. Use a humidifier or mist occasionally to replicate tropical humidity levels."
+          }
+        ]
+      }
