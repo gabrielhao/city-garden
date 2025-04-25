@@ -9,6 +9,9 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from dotenv import load_dotenv
 import os
 from langchain_openai import ChatOpenAI
+from langsmith import Client
+from langchain_core.tracers import LangChainTracer
+from langchain_core.callbacks.manager import CallbackManager
 """ 
 City Garden Graph is a state graph that defines the flow of the city garden project. 
 with time, images, it retrieves "sun_exposure", "micro_climate", "hardscape_elements", "plant_iventory".
@@ -26,9 +29,12 @@ Node 5: Generate final output. Take garden_info and plant_recommendations and cr
 """
 
 # [+] add model
-# [TODO] add images
-# [TODO] add langsmith tracing
+# [+] add images
+# [+] add langsmith tracing
+# [TODO] merge nodes
+# [TODO] add content safety
 # [TODO] add tool binding
+# [TODO] debug all
 
 class CityGardenGraph(StateGraph):
     def __init__(self, llm: BaseChatModel):
@@ -42,7 +48,18 @@ class CityGardenGraph(StateGraph):
 
         load_dotenv()
 
-        self.llm = ChatOpenAI(model=os.environ["GITHUB_MODEL_NAME"], base_url=os.environ["GITHUB_ENDPOINT"], api_key=os.environ["GITHUB_TOKEN"])
+        # Set up LangSmith tracing if API key is available
+        self.tracing_enabled = os.environ.get("LANGCHAIN_API_KEY") is not None
+        if self.tracing_enabled:
+            self.langsmith_client = Client()
+            self.tracer = LangChainTracer(
+                project_name=os.environ.get("LANGCHAIN_PROJECT")
+            )
+            self.callback_manager = CallbackManager([self.tracer])
+            # Add tracing to the LLM
+            llm.callbacks = self.callback_manager
+
+        self.llm = llm
         
 
         # Add the 4 parallel nodes
@@ -99,9 +116,7 @@ class CityGardenGraph(StateGraph):
             "https://hackthonhub6837342568.blob.core.windows.net/images/example-2-balcony-4.jpeg",
             "https://hackthonhub6837342568.blob.core.windows.net/images/example-2-balcony-5.jpeg"
         ]
-        garden_images = load_images(image_urls)
-        # [TODO] Add images and time of day to the prompt
-        time_of_day = "16:00"
+        garden_image_contents = load_images(image_urls)
 
         messages = [
             SystemMessage(content=system_prompt),
@@ -109,8 +124,10 @@ class CityGardenGraph(StateGraph):
                 content=[
                     {"type": "text", "text": "Analyze this garden"},
                     {
-                        "type": "image_url",
-                        "image_url": {"url": f"data:image/jpeg;base64,{garden_images}"},
+                        "type": "image",
+                        "source_type": "base64",
+                        "data": garden_image_contents,
+                        "mime_type": "image/jpeg",
                     }
                 ]
             )

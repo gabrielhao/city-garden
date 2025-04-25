@@ -5,6 +5,7 @@ import re
 import requests
 from dotenv import load_dotenv
 import os
+import base64
 
 class AzureImageLoader:
     def __init__(self, account_name: str, account_key: str):
@@ -34,14 +35,15 @@ class AzureImageLoader:
         blob_client.download_blob().readinto(stream)
         stream.seek(0)
         image = Image.open(stream)
-        return image
+        image_content = base64.b64encode(image).decode('utf-8')
+        return image_content
 
 
     def load_images(self, blob_urls):
-        images = []
+        image_contents = []
         for blob_url in blob_urls:
-            images.append(self.load_image(blob_url))
-        return images
+            image_contents.append(self.load_image(blob_url))
+        return image_contents
     
 
 # TEST CODE

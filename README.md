@@ -13,6 +13,7 @@ City Garden is an AI-powered application that helps urban gardeners design and o
 - **Wind Pattern Analysis**: Analyzes wind patterns and their impact on garden design
 - **Style Preferences**: Incorporates user style preferences into recommendations
 - **Comprehensive Reports**: Generates detailed garden design reports with plant recommendations
+- **LangSmith Tracing**: Monitors and debugs the application flow with detailed tracing
 
 ## Project Structure
 
@@ -154,6 +155,24 @@ images = image_loader.load_images([
 ])
 ```
 
+### LangSmith Tracing
+
+The application includes LangSmith tracing to monitor and debug the graph execution. To enable tracing:
+
+1. Set up your LangSmith API key in the `.env` file:
+   ```
+   LANGCHAIN_API_KEY=your_langsmith_api_key
+   LANGCHAIN_PROJECT=city-garden
+   LANGCHAIN_TRACING_V2=true
+   ```
+
+2. The tracing will automatically be enabled when you run the application.
+
+3. View traces in the LangSmith dashboard:
+   - Go to https://smith.langchain.com/
+   - Navigate to the "city-garden" project
+   - View detailed traces of each node execution
+
 ## Testing
 
 Run the tests with pytest:
@@ -172,3 +191,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - OpenWeatherMap API for climate data
 - LangChain for LLM integration
 - LangGraph for workflow management
+- LangSmith for tracing and monitoring
