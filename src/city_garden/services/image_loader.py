@@ -30,59 +30,23 @@ class AzureImageLoader:
             blob_name=blob_name,
             credential=self.account_key
         )
+        print(f"Loading image from: {blob_url}")
+        blob_data = blob_client.download_blob().readall()
+        
+        # Debug: Show the image
+        # stream = BytesIO(blob_data)
+        # image = Image.open(stream)
+        # image.show()
+        
+        image_content = base64.b64encode(blob_data).decode("utf-8")
 
-        stream = BytesIO()
-        blob_client.download_blob().readinto(stream)
-        stream.seek(0)
-        image = Image.open(stream)
-        image_content = base64.b64encode(image).decode('utf-8')
         return image_content
 
 
     def load_images(self, blob_urls):
+        print(f"Loading {len(blob_urls)} images from Azure Blob Storage")
         image_contents = []
         for blob_url in blob_urls:
             image_contents.append(self.load_image(blob_url))
         return image_contents
     
-
-# TEST CODE
-# if __name__ == "__main__":
-#     # Load environment variables
-#     load_dotenv()
-    
-#     # Initialize the image loader
-#     image_loader = AzureImageLoader(
-#         account_name=os.environ["AZURE_STORAGE_ACCOUNT_NAME"],
-#         account_key=os.environ["AZURE_STORAGE_ACCOUNT_KEY"]
-#     )
-    
-#     # Test loading a single image
-#     try:
-#         # Replace with an actual blob URL from your Azure storage
-#         test_blob_url = "https://hackthonhub6837342568.blob.core.windows.net/images/example-2-compass.jpeg"
-#         print(f"Loading image from: {test_blob_url}")
-#         image = image_loader.load_image(test_blob_url)
-#         print(f"Successfully loaded image: {image.size}")
-        
-#         # Display image information
-#         print(f"Image size: {image.size}")
-#         print(f"Image mode: {image.mode}")
-#         print(f"Image format: {image.format}")
-        
-#         # Test loading multiple images
-#         test_blob_urls = [
-#             "https://hackthonhub6837342568.blob.core.windows.net/images/example-2-balcony-1.jpeg",
-#             "https://hackthonhub6837342568.blob.core.windows.net/images/example-2-balcony-2.jpeg"
-#         ]
-#         print(f"\nLoading multiple images from: {test_blob_urls}")
-#         images = image_loader.load_images(test_blob_urls)
-#         print(f"Successfully loaded {len(images)} images")
-        
-#         for i, img in enumerate(images):
-#             print(f"Image {i+1} size: {img.size}")
-    
-#     except Exception as e:
-#         print(f"Error: {str(e)}")
-    
-

@@ -15,4 +15,10 @@ class GardenState(TypedDict):
     wind_pattern: Optional[str]
     style_preferences: str
     plant_recommendations: List[str]
+    location: str
+    latitude: float
+    longitude: float
+    final_output: str
+    compliance_check: str
+    images: List[str]
     messages: List[Dict[str, Any]]

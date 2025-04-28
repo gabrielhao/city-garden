@@ -13,6 +13,7 @@ from azure.core.exceptions import HttpResponseError
 from dataclasses import dataclass
 from typing import Optional
 from urllib.parse import urlparse
+from dotenv import load_dotenv
 
 @dataclass
 class ImageAnalysisResult:
@@ -113,6 +114,44 @@ class ContentAnalyzer:
             sexual_severity=sexual_result.severity,
             violence_severity=violence_result.severity
         )
+        
+    def analyze_image_data(self, image_data: bytes) -> ImageAnalysisResult:
+        """
+        Analyze an image from raw bytes for safety concerns.
+        Args:
+            image_data (bytes): Raw image data to analyze
+            
+        Returns:
+            ImageAnalysisResult: Object containing severity levels for different categories
+            
+        Raises:
+            HttpResponseError: If the analysis request fails
+        """
+        # Build request
+        request = AnalyzeImageOptions(image=ImageData(content=image_data))
+
+        # Analyze image
+        try:
+            response = self.client.analyze_image(request)
+        except HttpResponseError as e:
+            print("Analyze image failed.")
+            if e.error:
+                print(f"Error code: {e.error.code}")
+                print(f"Error message: {e.error.message}")
+            raise
+
+        # Extract results for each category
+        hate_result = next(item for item in response.categories_analysis if item.category == ImageCategory.HATE)
+        self_harm_result = next(item for item in response.categories_analysis if item.category == ImageCategory.SELF_HARM)
+        sexual_result = next(item for item in response.categories_analysis if item.category == ImageCategory.SEXUAL)
+        violence_result = next(item for item in response.categories_analysis if item.category == ImageCategory.VIOLENCE)
+
+        return ImageAnalysisResult(
+            hate_severity=hate_result.severity,
+            self_harm_severity=self_harm_result.severity,
+            sexual_severity=sexual_result.severity,
+            violence_severity=violence_result.severity
+        )
 
     def analyze_text(self, text: str) -> TextAnalysisResult:
         """
@@ -155,9 +194,15 @@ class ContentAnalyzer:
 
 def main():
     """Example usage of the ContentAnalyzer class."""
-    # TODO: move to env variables
-    CONTENT_SAFETY_ENDPOINT = "https://city-garden-content-safty.cognitiveservices.azure.com/"
-    CONTENT_SAFETY_KEY = "BFcEEQ1w6DS7FTSc4aHNlF9eVcouRXdegT8kkbMbRoznmPtDZBM2JQQJ99BDACYeBjFXJ3w3AAAHACOGADN6"
+    # Load environment variables
+    load_dotenv()
+    
+    # Get credentials from environment variables
+    CONTENT_SAFETY_ENDPOINT = os.getenv("CONTENT_SAFETY_ENDPOINT")
+    CONTENT_SAFETY_KEY = os.getenv("CONTENT_SAFETY_KEY")
+    
+    if not CONTENT_SAFETY_ENDPOINT or not CONTENT_SAFETY_KEY:
+        raise ValueError("Missing required environment variables: CONTENT_SAFETY_ENDPOINT and/or CONTENT_SAFETY_KEY")
     
     analyzer = ContentAnalyzer(CONTENT_SAFETY_ENDPOINT, CONTENT_SAFETY_KEY)
     
