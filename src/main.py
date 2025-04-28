@@ -35,7 +35,13 @@ def main():
     for image_content in garden_image_contents:
         analysis_result = content_analyzer.analyze_image_data(image_content)
         if analysis_result.hate_severity > 0.5 or analysis_result.self_harm_severity > 0.5 or analysis_result.sexual_severity > 0.5 or analysis_result.violence_severity > 0.5:
-            raise ValueError("Content safety check failed")
+            raise ValueError("Image content safety check failed")
+        else:
+            #print all the analysis results
+            print(f"Hate severity: {analysis_result.hate_severity}")
+            print(f"Self harm severity: {analysis_result.self_harm_severity}")
+            print(f"Sexual severity: {analysis_result.sexual_severity}")
+            print(f"Violence severity: {analysis_result.violence_severity}")
     
     
     # Create the graph
@@ -60,6 +66,19 @@ def main():
     
     # Run the graph
     final_state = graph.invoke(initial_state)
+    
+    # Check content safety of the final output
+    final_output = final_state["final_output"]
+    analysis_result = content_analyzer.analyze_text(final_output)
+    if analysis_result.hate_severity > 0.5 or analysis_result.self_harm_severity > 0.5 or analysis_result.sexual_severity > 0.5 or analysis_result.violence_severity > 0.5:
+        raise ValueError("Final output content safety check failed")
+    else:
+        #print all the analysis results
+        print(f"Hate severity: {analysis_result.hate_severity}")
+        print(f"Self harm severity: {analysis_result.self_harm_severity}")
+        print(f"Sexual severity: {analysis_result.sexual_severity}")
+        print(f"Violence severity: {analysis_result.violence_severity}")
+
     
     # Print the final output
     print("\n=== FINAL GARDEN DESIGN REPORT ===\n")
