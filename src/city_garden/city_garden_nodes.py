@@ -280,6 +280,56 @@ def generate_final_output(state: GardenState) -> GardenState:
     
     return state
 
+def create_garden_image(state: GardenState) -> GardenState:
+    """
+    Create a garden image based on the garden information and plant recommendations. The image should be in colorful hand-drawn style.
+    The image is created by LLM. For debugging, the image is shown.
+    """
+    print("Creating garden image")
+    
+    # Get garden information from state
+    garden_image_contents = state.get('images', 'Not analyzed')
+    plant_recommendations = state.get('plant_recommendations', 'Not analyzed')
+    
+    system_prompt = """
+    You are a professional image editor. Given multiple uploaded images taken from different angles of a balcony and a list of plants, your task is to:
+
+    - Generate an image that shows the visual effect of growing some or all of the listed plants within the provided scenes.
+    - Do not modify any other parts of the original images.
+    - Keep the image in colorful hand-drawn style.
+    
+    You only need to write detailed description of the image. This description will be used as text prompt to create the image.
+
+    """
+    
+    message_content = [{'type': 'text', 'text': f"""
+        Create a comprehensive garden image based on provided images and the following information:
+        ### Plants to be grown:
+        {plant_recommendations}
+        """
+        }]
+    
+    for image_content in garden_image_contents:
+        message_content.append({
+            "type": "image_url",
+            "image_url": {
+                "url": f"data:image/jpeg;base64,{image_content}"
+            }
+        })
+    
+    messages = [
+        SystemMessage(content=system_prompt),
+        HumanMessage(content=message_content)
+    ] 
+    
+    response = llm.invoke(messages)
+    
+    state["garden_image"] = response.content
+    
+    print(f"Garden image: {state['garden_image']}")
+    
+    return state
+
 def extract_value(text: str, key: str) -> Optional[str]:
     """Extract a value from text using JSON parsing.
     

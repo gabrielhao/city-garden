@@ -20,5 +20,6 @@ class GardenState(TypedDict):
     longitude: float
     final_output: str
     compliance_check: str
+    garden_image: str
     images: List[str]
     messages: List[Dict[str, Any]]

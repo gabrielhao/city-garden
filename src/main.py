@@ -5,7 +5,7 @@ import os
 from city_garden.garden_state import GardenState
 from city_garden.services.image_loader import AzureImageLoader
 from city_garden.services.content_safety import ContentAnalyzer
-
+from city_garden.services.image_generation import generate_image
 def main():
     
     # Load images
@@ -36,12 +36,12 @@ def main():
         analysis_result = content_analyzer.analyze_image_data(image_content)
         if analysis_result.hate_severity > 0.5 or analysis_result.self_harm_severity > 0.5 or analysis_result.sexual_severity > 0.5 or analysis_result.violence_severity > 0.5:
             raise ValueError("Image content safety check failed")
-        else:
-            #print all the analysis results
-            print(f"Hate severity: {analysis_result.hate_severity}")
-            print(f"Self harm severity: {analysis_result.self_harm_severity}")
-            print(f"Sexual severity: {analysis_result.sexual_severity}")
-            print(f"Violence severity: {analysis_result.violence_severity}")
+        # else:
+        #     #print all the analysis results
+        #     print(f"Hate severity: {analysis_result.hate_severity}")
+        #    print(f"Self harm severity: {analysis_result.self_harm_severity}")
+        #    print(f"Sexual severity: {analysis_result.sexual_severity}")
+        #    print(f"Violence severity: {analysis_result.violence_severity}")
     
     
     # Create the graph
@@ -72,20 +72,20 @@ def main():
     analysis_result = content_analyzer.analyze_text(final_output)
     if analysis_result.hate_severity > 0.5 or analysis_result.self_harm_severity > 0.5 or analysis_result.sexual_severity > 0.5 or analysis_result.violence_severity > 0.5:
         raise ValueError("Final output content safety check failed")
-    else:
-        #print all the analysis results
-        print(f"Hate severity: {analysis_result.hate_severity}")
-        print(f"Self harm severity: {analysis_result.self_harm_severity}")
-        print(f"Sexual severity: {analysis_result.sexual_severity}")
-        print(f"Violence severity: {analysis_result.violence_severity}")
+    # else:
+    #     #print all the analysis results
+    #     print(f"Hate severity: {analysis_result.hate_severity}")
+    #     print(f"Self harm severity: {analysis_result.self_harm_severity}")
+    #     print(f"Sexual severity: {analysis_result.sexual_severity}")
+    #     print(f"Violence severity: {analysis_result.violence_severity}")
 
     
     # Print the final output
-    print("\n=== FINAL GARDEN DESIGN REPORT ===\n")
-    if final_state.get("final_output"):
-        print(final_state["final_output"])
-    else:
-        print("No garden design report available. The compliance check may have failed.")
+    # print("\n=== FINAL GARDEN DESIGN REPORT ===\n")
+    # if final_state.get("final_output"):
+    #     print(final_state["final_output"])
+    # else:
+    #     print("No garden design report available. The compliance check may have failed.")
     
     # Print plant recommendations
     print("\n=== PLANT RECOMMENDATIONS ===\n")
@@ -93,6 +93,19 @@ def main():
         print(final_state["plant_recommendations"])
     else:
         print("No plant recommendations available. The compliance check may have failed.")
+        
+        
+    # Print the garden image
+    print("\n=== GARDEN IMAGE ===\n")
+    if final_state.get("garden_image"):
+        garden_image = final_state["garden_image"]
+        print(garden_image)
+    else:
+        print("No garden image available. The compliance check may have failed.")
+    
+    # Generate the garden image and show it
+    garden_image = generate_image(garden_image)
+    garden_image.show()    
 
 
 if __name__ == "__main__":
