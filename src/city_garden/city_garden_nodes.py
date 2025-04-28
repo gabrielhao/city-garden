@@ -43,9 +43,9 @@ Node 5: Generate final output. Take garden_info and plant_recommendations and cr
 # [+] add location input
 # [+] update prompt
 # [+] debug all
-# [TODO] move images to the state
-# [TODO] add content safety
-# [TODO] finalize the code
+# [+] move images to the state
+# [+] add content safety
+# [+] finalize the code
 # [TODO] integrate with the website
 
 def check_compliance(state: GardenState) -> GardenState:
@@ -203,8 +203,6 @@ def generate_final_output(state: GardenState) -> GardenState:
     
     # User's preferences
     preferences = state.get('style_preferences', 'Not analyzed')
-    # Get plant recommendations
-    #plant_recommendations = state.get('plant_recommendations', 'No plant recommendations available')
     
     # Create a prompt for the LLM to generate a structured report
     system_prompt = """
