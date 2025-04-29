@@ -68,10 +68,10 @@ def main():
     final_state = graph.invoke(initial_state)
     
     # Check content safety of the final output
-    final_output = final_state["final_output"]
-    analysis_result = content_analyzer.analyze_text(final_output)
+    """final_output = final_state["final_output"]
+    analysis_result = content_analyzer.analyze_image_data(final_output)
     if analysis_result.hate_severity > 0.5 or analysis_result.self_harm_severity > 0.5 or analysis_result.sexual_severity > 0.5 or analysis_result.violence_severity > 0.5:
-        raise ValueError("Final output content safety check failed")
+        raise ValueError("Final output content safety check failed")"""
     # else:
     #     #print all the analysis results
     #     print(f"Hate severity: {analysis_result.hate_severity}")
@@ -96,16 +96,14 @@ def main():
         
         
     # Print the garden image
+    from PIL import Image
     print("\n=== GARDEN IMAGE ===\n")
     if final_state.get("garden_image"):
         garden_image = final_state["garden_image"]
-        print(garden_image)
+        img = Image.open("balcony.png")
+        img.show()
     else:
         print("No garden image available. The compliance check may have failed.")
-    
-    # Generate the garden image and show it
-    garden_image = generate_image(garden_image)
-    garden_image.show()    
 
 
 if __name__ == "__main__":

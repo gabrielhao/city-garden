@@ -18,6 +18,11 @@ import re
 import logging
 from city_garden.llm import llm
 logger = logging.getLogger(__name__)
+from io import BytesIO
+
+from base64 import b64decode
+from openai import OpenAI
+import base64
 
 """ 
 City Garden Graph is a state graph that defines the flow of the city garden project. 
@@ -280,53 +285,59 @@ def generate_final_output(state: GardenState) -> GardenState:
     
     return state
 
+
 def create_garden_image(state: GardenState) -> GardenState:
     """
     Create a garden image based on the garden information and plant recommendations. The image should be in colorful hand-drawn style.
     The image is created by LLM. For debugging, the image is shown.
     """
+
+    def generate_image_with_gpt(balcony_description: str, image_files: List[BytesIO]) -> Optional[str]:
+        client = OpenAI()
+        try:
+            response = client.images.edit(
+                model="gpt-image-1",
+                image=image_files,
+                prompt=balcony_description
+            )
+            
+            with open("balcony.png", "wb") as file:
+                file.write(b64decode(response.data[0].b64_json))
+            
+            print("Balcony image saved.")
+            return response.data[0].b64_json
+        
+        except Exception as err:
+            print("Error generating image:", err)
+            return None
+    
     print("Creating garden image")
     
     # Get garden information from state
     garden_image_contents = state.get('images', 'Not analyzed')
     plant_recommendations = state.get('plant_recommendations', 'Not analyzed')
-    
-    system_prompt = """
+    # Wrap loaded Azure images as file-like objects
+    image_files = []
+    for idx, img_bytes in enumerate(garden_image_contents):
+        bio = BytesIO(base64.b64decode(img_bytes))
+        bio.name = f"image_{idx}.jpeg"  # <-- Give it a filename with proper extension!
+        image_files.append(bio)
+
+    system_prompt = f"""
     You are a professional image editor. Given multiple uploaded images taken from different angles of a balcony and a list of plants, your task is to:
 
     - Generate an image that shows the visual effect of growing some or all of the listed plants within the provided scenes.
     - Do not modify any other parts of the original images.
-    - Keep the image in colorful hand-drawn style.
+    - Keep the image in colorful sketch style.
     
-    You only need to write detailed description of the image. This description will be used as text prompt to create the image.
-
+    ### Plants to be grown:
+    {plant_recommendations}
     """
-    
-    message_content = [{'type': 'text', 'text': f"""
-        Create a comprehensive garden image based on provided images and the following information:
-        ### Plants to be grown:
-        {plant_recommendations}
-        """
-        }]
-    
-    for image_content in garden_image_contents:
-        message_content.append({
-            "type": "image_url",
-            "image_url": {
-                "url": f"data:image/jpeg;base64,{image_content}"
-            }
-        })
-    
-    messages = [
-        SystemMessage(content=system_prompt),
-        HumanMessage(content=message_content)
-    ] 
-    
-    response = llm.invoke(messages)
-    
-    state["garden_image"] = response.content
-    
-    print(f"Garden image: {state['garden_image']}")
+
+    response = generate_image_with_gpt(balcony_description=system_prompt, image_files=image_files)
+
+    state["garden_image"] = response  # Store the generated image byte
+    #print(f"Garden image: {state['garden_image']}")
     
     return state
 
@@ -343,6 +354,7 @@ def extract_value(text: str, key: str) -> Optional[str]:
     Raises:
         ValueError: If the text is empty or invalid
     """
+
     if not text or not isinstance(text, str):
         raise ValueError("Text must be a non-empty string")
         
