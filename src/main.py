@@ -8,6 +8,9 @@ from city_garden.services.content_safety import ContentAnalyzer
 from city_garden.services.image_generation import generate_image
 def main():
     
+    #[TODO] create API to be called by frontend
+    #[TODO] API should take in the user's input (location, langtitude, altitude, user preferences, balcony image URLs) and return the garden design image and plant recommendations
+    
     # Load images
     image_urls = [            
         "https://hackthonhub6837342568.blob.core.windows.net/images/example-2-balcony-1.jpeg",
