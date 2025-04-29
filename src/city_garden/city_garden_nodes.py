@@ -19,10 +19,12 @@ import logging
 from city_garden.llm import llm
 logger = logging.getLogger(__name__)
 from io import BytesIO
-
 from base64 import b64decode
 from openai import OpenAI
 import base64
+
+load_dotenv()
+
 
 """ 
 City Garden Graph is a state graph that defines the flow of the city garden project. 
