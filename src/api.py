@@ -53,7 +53,7 @@ class GardenPlanRequest(BaseModel):
 
 class GardenPlanResponse(BaseModel):
     garden_image_url: str
-    plant_recommendations: List[str]
+    plant_recommendations: List[Dict[str, Any]]
 
 @app.post("/api/garden_plan", response_model=GardenPlanResponse)
 async def create_garden_plan(request: GardenPlanRequest):
@@ -124,6 +124,9 @@ async def create_garden_plan(request: GardenPlanRequest):
         logger.info("Running the garden planning graph")
         final_state = graph.invoke(initial_state)
         logger.info("Graph execution completed")
+        
+        # print out plant recommendations
+        print(f"Plant recommendations: {final_state['plant_recommendations']}")
         
         # Return the results
         return GardenPlanResponse(

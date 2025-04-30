@@ -3,6 +3,7 @@ from langgraph.graph.message import add_messages
 from typing import Dict, Any, List, TypedDict, Annotated, Optional
 import sys
 import os
+import json
 from datetime import datetime
 from azure.storage.blob import BlobClient
 import base64
@@ -267,10 +268,11 @@ def generate_final_output(state: GardenState) -> GardenState:
     response = llm.invoke(messages)
     final_report = response.content
     
-    print(f"Final report: {final_report}")
+    #print(f"Final report: {final_report}")
     
     if "plant_recommendations" in final_report:
-        state["plant_recommendations"] = extract_value(final_report, "plant_recommendations")
+        state["plant_recommendations"] = json.loads(final_report)["plant_recommendations"]
+        print(f"Plant Recommendations: {state['plant_recommendations']}")
     else:
         state["plant_recommendations"] = "None, no information"
     
