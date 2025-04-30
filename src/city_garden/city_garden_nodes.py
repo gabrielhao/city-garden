@@ -126,7 +126,7 @@ def analyze_garden_conditions(state: GardenState) -> GardenState:
     print(f"Garden image contents loaded: {len(garden_image_contents)}")
 
     # Create message content with all images
-    message_content = [{'type': 'text', 'text': f"Analyze the images."}]
+    message_content = [{'type': 'text', 'text': f"Analyze the images. The latitude and longitude are {state['latitude']} and {state['longitude']}."}]
     for image_content in garden_image_contents:
         message_content.append({
             "type": "image_url",

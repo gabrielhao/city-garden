@@ -8,8 +8,8 @@ from city_garden.tools.climate import get_monthly_average_temperature, get_month
 
 load_dotenv()
 #verify env variables
-print(f"AZURE_MODEL_NAME: {os.environ['AZURE_MODEL_NAME']}")
-print(f"AZURE_ENDPOINT: {os.environ['AZURE_OPENAI_ENDPOINT']}")
+#print(f"AZURE_MODEL_NAME: {os.environ['AZURE_MODEL_NAME']}")
+#print(f"AZURE_ENDPOINT: {os.environ['AZURE_OPENAI_ENDPOINT']}")
 
 llm = AzureChatOpenAI(
     azure_deployment=os.environ["AZURE_MODEL_NAME"],  # or your deployment
