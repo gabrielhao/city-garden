@@ -293,6 +293,8 @@ def create_garden_image(state: GardenState) -> GardenState:
     Create a garden image based on the garden information and plant recommendations. The image should be in colorful hand-drawn style.
     The image is created by LLM. For debugging, the image is shown.
     """
+    
+    load_dotenv()
 
     def generate_image_with_gpt(balcony_description: str, image_files: List[BytesIO]) -> Optional[str]:
         client = OpenAI()
@@ -318,7 +320,9 @@ def create_garden_image(state: GardenState) -> GardenState:
     # Get garden information from state
     garden_image_contents = state.get('images', 'Not analyzed')
     plant_recommendations = state.get('plant_recommendations', 'Not analyzed')
+    
     # Wrap loaded Azure images as file-like objects
+    print("Wrapping loaded Azure images as file-like objects")
     image_files = []
     for idx, img_bytes in enumerate(garden_image_contents):
         bio = BytesIO(base64.b64decode(img_bytes))
@@ -336,7 +340,10 @@ def create_garden_image(state: GardenState) -> GardenState:
     {plant_recommendations}
     """
 
+    print("Generating image with GPT")
     response = generate_image_with_gpt(balcony_description=system_prompt, image_files=image_files)
+    
+    print("Image generated with GPT")
 
     state["garden_image"] = response  # Store the generated image byte
     #print(f"Garden image: {state['garden_image']}")
