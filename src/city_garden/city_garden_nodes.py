@@ -229,16 +229,19 @@ def generate_final_output(state: GardenState) -> GardenState:
     {
       "plant_recommendations": [
         {
+          "id": 0,
           "name": "<plantA>",
           "description": "<A description of plantA.>",
           "care_tips": "<Care tips of plantA.>"
         },
         {
+          "id": 1,
           "name": "<plantB>",
           "description": "<A description of plantB.>",
           "care_tips": "<Care tips of plantB.>"
         },
         {
+          "id": 2,
           "name": "<plantC>",
           "description": "<A description of plantC.>",
           "care_tips": "<Care tips of plantC.>"
