@@ -14,26 +14,87 @@ City Garden is an AI-powered application that helps urban gardeners design and o
 - **Style Preferences**: Incorporates user style preferences into recommendations
 - **Comprehensive Reports**: Generates detailed garden design reports with plant recommendations
 - **Garden Visualization**: Generates visual representations of the recommended garden design
-- **LangSmith Tracing**: Monitors and debugs the application flow with detailed tracing
+- **Content Safety**: Validates images for appropriate content
+- **REST API**: Provides a FastAPI endpoint for garden planning
 
 ## Project Structure
 
 ```
 city-garden/
 ├── src/
+│   ├── main.py                        # Main application entry point
+│   ├── api.py                         # FastAPI implementation
+│   ├── run_api.py                     # API server runner
 │   └── city_garden/
 │       ├── __init__.py
-│       ├── city_garden_graph.py      # Main graph implementation
-│       ├── garden_state.py           # State management
+│       ├── city_garden_nodes.py       # Graph node implementations
+│       ├── garden_state.py            # State management
+│       ├── graph_builder.py           # Graph construction
+│       ├── llm.py                     # LLM configuration
 │       └── services/
-│           ├── image_loader.py       # Azure blob storage image loader
-│           └── image_generation.py   # Garden visualization service
-│           ├── content_safety.py         # Image/Text safety analysis
+│           ├── image_loader.py        # Azure blob storage image loader
+│           ├── content_safety.py      # Image/Text safety analysis
+│           └── image_generation.py    # Garden visualization service
 ├── tests/
-│   └── test_city_garden_graph.py     # Tests for the graph
 ├── .env                               # Environment variables
 ├── requirements.txt                   # Project dependencies
 └── README.md                          # This file
+```
+
+## Architecture
+
+```mermaid
+graph TD
+    subgraph Frontend
+        UI[User Interface]
+    end
+
+    subgraph API Layer
+        API[FastAPI Server]
+        CORS[CORS Middleware]
+        API --> CORS
+    end
+
+    subgraph Core Services
+        Graph[Garden Graph]
+        State[Garden State]
+        Graph --> State
+    end
+
+    subgraph External Services
+        AzureStorage[Azure Blob Storage]
+        ContentSafety[Azure Content Safety]
+        OpenAI[OpenAI GPT]
+        WeatherAPI[Weather API]
+    end
+
+    subgraph Processing Pipeline
+        ImageLoader[Image Loader]
+        ImageGen[Image Generation]
+        PlantRec[Plant Recommendations]
+        SafetyCheck[Content Safety Check]
+    end
+
+    %% Connections
+    UI -->|HTTP Request| API
+    API -->|Process| Graph
+    Graph -->|Load| ImageLoader
+    ImageLoader -->|Store| AzureStorage
+    Graph -->|Generate| ImageGen
+    ImageGen -->|Use| OpenAI
+    Graph -->|Check| SafetyCheck
+    SafetyCheck -->|Validate| ContentSafety
+    Graph -->|Get| PlantRec
+    PlantRec -->|Use| OpenAI
+    Graph -->|Get Weather| WeatherAPI
+
+    %% Data Flow
+    ImageLoader -.->|Base64 Images| State
+    ImageGen -.->|Generated Image| State
+    PlantRec -.->|Recommendations| State
+    SafetyCheck -.->|Validation| State
+    State -.->|Response| API
+    API -.->|JSON Response| UI
 ```
 
 ## Installation
@@ -58,152 +119,66 @@ city-garden/
 4. Set up environment variables:
    Create a `.env` file in the root directory with the following variables:
    ```
-   # Azure Content Safety API credentials
-   CONTENT_SAFETY_ENDPOINT=your_endpoint
-   CONTENT_SAFETY_KEY=your_key
-
-   # OpenWeatherMap API credentials
-   OPENWEATHERMAP_API_KEY=your_key
-
-   # LangSmith tracing (optional)
-   LANGCHAIN_API_KEY=your_key
-   LANGCHAIN_PROJECT=city-garden
-   LANGCHAIN_TRACING_V2=true
-
-   # Default city for climate data
-   DEFAULT_CITY=New York
-
    # Azure Storage credentials
    AZURE_STORAGE_ACCOUNT_NAME=your_account_name
    AZURE_STORAGE_ACCOUNT_KEY=your_account_key
 
-   # GitHub model credentials
-   GITHUB_ENDPOINT=your_endpoint
-   GITHUB_MODEL_NAME=your_model_name
-   GITHUB_TOKEN=your_token
+   # Azure Content Safety API credentials
+   AZURE_CONTENT_SAFETY_ENDPOINT=your_endpoint
+   AZURE_CONTENT_SAFETY_KEY=your_key
 
-   # Image Generation API credentials (if applicable)
-   IMAGE_GENERATION_API_KEY=your_key
-   IMAGE_GENERATION_ENDPOINT=your_endpoint
+   # OpenAI API credentials
+   OPENAI_API_KEY=your_key
    ```
-   
-5. Run the main.py
-   ```
-   python3 src/main.py
-   ```
+
 ## Usage
 
-### Running the Garden Graph
-
-```python
-from src.city_garden.city_garden_graph import CityGardenGraph
-from src.city_garden.garden_state import GardenState
-from langchain_openai import ChatOpenAI
-import os
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
-
-# Initialize the LLM
-llm = ChatOpenAI(
-    model=os.environ["GITHUB_MODEL_NAME"], 
-    base_url=os.environ["GITHUB_ENDPOINT"], 
-    api_key=os.environ["GITHUB_TOKEN"]
-)
-
-# Create the graph
-graph = CityGardenGraph(llm)
-
-# Initialize the state
-initial_state = GardenState(
-    sun_exposure="",
-    micro_climate="",
-    hardscape_elements="",
-    plant_iventory="",
-    environment_factors="",
-    wind_pattern="",
-    style_preferences="",
-    plant_recommendations=[],
-    messages=[],
-    city=os.environ.get("DEFAULT_CITY", "New York"),
-    style_preference="Modern minimalist with native plants",
-    wind_info="The garden is exposed to moderate winds from the northwest."
-)
-
-# Run the graph
-final_state = graph(initial_state)
-
-# Access the results
-print(final_state["final_output"])
-print(final_state["plant_recommendations"])
-```
-
-### Loading Images from Azure Blob Storage
-
-```python
-from src.city_garden.services.image_loader import AzureImageLoader
-import os
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
-
-# Initialize the image loader
-image_loader = AzureImageLoader(
-    account_name=os.environ["AZURE_STORAGE_ACCOUNT_NAME"],
-    account_key=os.environ["AZURE_STORAGE_ACCOUNT_KEY"]
-)
-
-# Load a single image
-image = image_loader.load_image("https://your-storage-account.blob.core.windows.net/container/image.jpg")
-
-# Load multiple images
-images = image_loader.load_images([
-    "https://your-storage-account.blob.core.windows.net/container/image1.jpg",
-    "https://your-storage-account.blob.core.windows.net/container/image2.jpg"
-])
-```
-
-### Garden Visualization
-
-The application can generate visual representations of the recommended garden design based on the analysis and plant recommendations. The visualization is created using the garden image description generated by the LLM and processed through an image generation service.
-
-```python
-from src.city_garden.services.image_generation import generate_image
-
-# Generate and display the garden visualization
-garden_image = generate_image(garden_description)
-garden_image.show()
-```
-
-The visualization helps users better understand how their garden will look with the recommended plants and layout.
-
-### LangSmith Tracing
-
-The application includes LangSmith tracing to monitor and debug the graph execution. To enable tracing:
-
-1. Set up your LangSmith API key in the `.env` file:
-   ```
-   LANGCHAIN_API_KEY=your_langsmith_api_key
-   LANGCHAIN_PROJECT=city-garden
-   LANGCHAIN_TRACING_V2=true
-   ```
-
-2. The tracing will automatically be enabled when you run the application.
-
-3. View traces in the LangSmith dashboard:
-   - Go to https://smith.langchain.com/
-   - Navigate to the "city-garden" project
-   - View detailed traces of each node execution
-
-## Testing
-
-Run the tests with pytest:
+### Running the API Server
 
 ```bash
-pytest
+python src/run_api.py
 ```
+
+The API will be available at `http://localhost:8000`
+
+### API Endpoints
+
+#### POST /api/garden_plan
+
+Request body:
+```json
+{
+  "image_urls": [
+    "https://your-storage-account.blob.core.windows.net/images/example.jpg"
+  ],
+  "user_preferences": {
+    "growType": "edible",
+    "subType": "herbs",
+    "cycleType": "perennial",
+    "winterType": "outdoors"
+  },
+  "location": {
+    "latitude": 52.52,
+    "longitude": 13.405,
+    "address": "Berlin, Germany"
+  }
+}
+```
+
+Response:
+```json
+{
+  "garden_image_url": "https://your-storage-account.blob.core.windows.net/images/garden_design.png",
+  "plant_recommendations": [
+    {
+      "name": "Plant Name",
+      "description": "Plant description",
+      "care_tips": "Care instructions"
+    }
+  ]
+}
+```
+
 
 ## License
 
@@ -211,8 +186,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Acknowledgments
 
-- Azure Content Safety API for image analysis
-- OpenWeatherMap API for climate data
-- LangChain for LLM integration
-- LangGraph for workflow management
-- LangSmith for tracing and monitoring
+- Azure Blob Storage for image storage
+- Azure Content Safety for image validation
+- OpenAI for image generation and plant recommendations
+- FastAPI for the API framework
