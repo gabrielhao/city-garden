@@ -53,7 +53,7 @@ class GardenPlanRequest(BaseModel):
 
 class GardenPlanResponse(BaseModel):
     garden_image_url: str
-    plant_recommendations: List[Dict[str, Any]]
+    plant_recommendations: List[Dict[Any, Any]]
 
 @app.post("/api/garden_plan", response_model=GardenPlanResponse)
 async def create_garden_plan(request: GardenPlanRequest):

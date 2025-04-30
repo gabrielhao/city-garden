@@ -325,6 +325,9 @@ def create_garden_image(state: GardenState) -> GardenState:
             
             image_url = image_loader.upload_image(image_content, "images", blob_name)
             state["garden_image_url"] = image_url
+            
+            print(f"Garden image URL: {state['garden_image_url']}")
+            
             return image_content
         
         except Exception as err:
