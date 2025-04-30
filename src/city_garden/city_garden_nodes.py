@@ -3,6 +3,10 @@ from langgraph.graph.message import add_messages
 from typing import Dict, Any, List, TypedDict, Annotated, Optional
 import sys
 import os
+from datetime import datetime
+from azure.storage.blob import BlobClient
+import base64
+from io import BytesIO
 
 from city_garden.garden_state import GardenState
 from city_garden.tools.climate import get_monthly_average_temperature, get_monthly_precipitation, get_wind_pattern
@@ -21,7 +25,6 @@ logger = logging.getLogger(__name__)
 from io import BytesIO
 from base64 import b64decode
 from openai import OpenAI
-import base64
 
 load_dotenv()
 
@@ -53,7 +56,7 @@ Node 5: Generate final output. Take garden_info and plant_recommendations and cr
 # [+] move images to the state
 # [+] add content safety
 # [+] finalize the code
-# [TODO] integrate with the website
+# [+] integrate with the website
 
 def check_compliance(state: GardenState) -> GardenState:
     """
@@ -305,17 +308,27 @@ def create_garden_image(state: GardenState) -> GardenState:
                 prompt=balcony_description
             )
             
-            with open("balcony.png", "wb") as file:
-                file.write(b64decode(response.data[0].b64_json))
+            # with open("balcony.png", "wb") as file:
+            #     file.write(b64decode(response.data[0].b64_json))
             
-            print("Balcony image saved.")
-            return response.data[0].b64_json
+            # print("Balcony image saved.")
+            
+            image_loader = AzureImageLoader(
+                account_name=os.environ["AZURE_STORAGE_ACCOUNT_NAME"],
+                account_key=os.environ["AZURE_STORAGE_ACCOUNT_KEY"]
+            )
+            
+            image_content = response.data[0].b64_json
+            blob_name = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}-garden_image.png"
+            
+            image_url = image_loader.upload_image(image_content, "images", blob_name)
+            state["garden_image_url"] = image_url
+            return image_content
         
         except Exception as err:
             print("Error generating image:", err)
             return None
     
-    print("Creating garden image")
     
     # Get garden information from state
     garden_image_contents = state.get('images', 'Not analyzed')
@@ -409,5 +422,21 @@ def extract_value(text: str, key: str) -> Optional[str]:
     except Exception as e:
         logger.error(f"Error extracting value for key '{key}': {str(e)}")
         return None
+
+def upload_image(image_content: str, container_name: str, blob_name: str) -> str:
+    """Upload an image to Azure Blob Storage and return its URL."""
+    blob_client = BlobClient(
+        account_url=f"https://{os.environ['AZURE_STORAGE_ACCOUNT_NAME']}.blob.core.windows.net",
+        container_name=container_name,
+        blob_name=blob_name,
+        credential=os.environ['AZURE_STORAGE_ACCOUNT_KEY']
+    )
+    
+    # Convert base64 to bytes and upload
+    image_bytes = base64.b64decode(image_content)
+    blob_client.upload_blob(image_bytes, overwrite=True)
+    
+    # Generate and return the URL
+    return f"https://{os.environ['AZURE_STORAGE_ACCOUNT_NAME']}.blob.core.windows.net/{container_name}/{blob_name}"
 
 

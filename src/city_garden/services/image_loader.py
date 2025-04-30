@@ -65,3 +65,13 @@ class AzureImageLoader:
                 raise
         return image_contents
     
+    # upload image to azure blob storage
+    def upload_image(self, image_content, container_name, blob_name):
+        blob_client = BlobClient(
+            account_url=f"https://{self.account_name}.blob.core.windows.net",
+            container_name=container_name,
+            blob_name=blob_name,
+            credential=self.account_key
+        )
+        blob_client.upload_blob(image_content)
+        return blob_client.url
