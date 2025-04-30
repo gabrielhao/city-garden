@@ -1,0 +1,38 @@
+[1mdiff --git a/balcony.png b/balcony.png[m
+[1mindex 5b90a23..9449081 100644[m
+Binary files a/balcony.png and b/balcony.png differ
+[1mdiff --git a/src/api.py b/src/api.py[m
+[1mindex afa8c42..0064f7d 100644[m
+[1m--- a/src/api.py[m
+[1m+++ b/src/api.py[m
+[36m@@ -53,7 +53,7 @@[m [mclass GardenPlanRequest(BaseModel):[m
+ [m
+ class GardenPlanResponse(BaseModel):[m
+     garden_image_url: str[m
+[31m-    plant_recommendations: List[Dict[str, Any]][m
+[32m+[m[32m    plant_recommendations: List[str][m
+ [m
+ @app.post("/api/garden_plan", response_model=GardenPlanResponse)[m
+ async def create_garden_plan(request: GardenPlanRequest):[m
+[36m@@ -126,7 +126,7 @@[m [masync def create_garden_plan(request: GardenPlanRequest):[m
+         logger.info("Graph execution completed")[m
+         [m
+         # print out plant recommendations[m
+[31m-        print(f"Plant recommendations: {final_state['plant_recommendations']}")[m
+[32m+[m[32m        print(f"Plant recommendations: {final_state.get('plant_recommendations', [])}")[m
+         [m
+         # Return the results[m
+         return GardenPlanResponse([m
+[1mdiff --git a/src/city_garden/city_garden_nodes.py b/src/city_garden/city_garden_nodes.py[m
+[1mindex 1040c9b..d939a2c 100644[m
+[1m--- a/src/city_garden/city_garden_nodes.py[m
+[1m+++ b/src/city_garden/city_garden_nodes.py[m
+[36m@@ -325,6 +325,8 @@[m [mdef create_garden_image(state: GardenState) -> GardenState:[m
+             [m
+             image_url = image_loader.upload_image(image_content, "images", blob_name)[m
+             state["garden_image_url"] = image_url[m
+[32m+[m[32m            print(f"Garden image URL: {state['garden_image_url']}")[m
+[32m+[m[41m            [m
+             return image_content[m
+         [m
+         except Exception as err:[m
