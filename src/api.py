@@ -127,11 +127,12 @@ async def create_garden_plan(request: GardenPlanRequest):
         
         # print out plant recommendations
         print(f"Plant recommendations: {final_state['plant_recommendations']}")
+        print(f"Garden image URL: {final_state['garden_image_url']}")   
         
         # Return the results
         return GardenPlanResponse(
-            garden_image_url=final_state.get("garden_image_url", ""),
-            plant_recommendations=final_state.get("plant_recommendations", [])
+            garden_image_url=final_state['garden_image_url'],
+            plant_recommendations=final_state['plant_recommendations']
         )
     except HTTPException:
         raise
