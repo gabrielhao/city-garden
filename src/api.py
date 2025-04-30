@@ -113,6 +113,8 @@ async def create_garden_plan(request: GardenPlanRequest):
             wind_pattern="",
             style_preferences=style_preferences,
             plant_recommendations=[],
+            garden_image_url="",
+            garden_image="",
             location=request.location.address,
             latitude=request.location.latitude,
             longitude=request.location.longitude,
