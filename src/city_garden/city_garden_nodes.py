@@ -367,7 +367,6 @@ def create_garden_image(state: GardenState) -> GardenState:
             
         print("Image generated successfully with GPT")
         state["garden_image"] = response
-        state["garden_image_url"] = f"data:image/png;base64,{response}"  # Add URL format for API response
             
     except Exception as e:
         print(f"Error during GPT image generation: {str(e)}")
