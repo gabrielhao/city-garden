@@ -341,13 +341,20 @@ def create_garden_image(state: GardenState) -> GardenState:
     """
 
     print("Generating image with GPT")
-    response = generate_image_with_gpt(balcony_description=system_prompt, image_files=image_files)
-    
-    print("Image generated with GPT")
-
-    state["garden_image"] = response  # Store the generated image byte
-    #print(f"Garden image: {state['garden_image']}")
-    
+    try:
+        response = generate_image_with_gpt(balcony_description=system_prompt, image_files=image_files)
+        if response is None:
+            print("Error: Failed to generate image with GPT")
+            return state
+            
+        print("Image generated successfully with GPT")
+        state["garden_image"] = response
+        state["garden_image_url"] = f"data:image/png;base64,{response}"  # Add URL format for API response
+            
+    except Exception as e:
+        print(f"Error during GPT image generation: {str(e)}")
+        return state
+            
     return state
 
 def extract_value(text: str, key: str) -> Optional[str]:
